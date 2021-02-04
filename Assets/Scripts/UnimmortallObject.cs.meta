@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ffe16f510e6c75e41a31658137596c99
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - blast: {fileID: 6594609076858354123, guid: 53dcfd54cd72e4148b4cbb867e70e493, type: 3}
+  - ShieldAttacked: {fileID: 4756976819831725407, guid: 25bef2607b8866e48a7a27796e5815b3, type: 3}
+  - RespawnManager: {fileID: 1346293847669579869, guid: 2f94e4663d115bc4cbb60b7acb030e71, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
