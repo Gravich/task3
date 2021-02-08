@@ -18,16 +18,16 @@ public class UnimmortallObject : MonoBehaviour
     private ParticleSystem ShieldDestroy;
     [SerializeField]
     private Respawner RespawnManager;
-    [SerializeField]
 
-    private float ShieldDefault;
     [SerializeField]
+    private float ShieldDefault;
     private float ShieldCurrent;
+
     [SerializeField]
     private float ShieldRegenSpeed;
+
     [SerializeField]
     private float HPDefault;
-    [SerializeField]
     private float HPCurrent;
 
     protected virtual void Start()

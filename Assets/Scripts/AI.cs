@@ -13,9 +13,7 @@ public class AI : UnimmortallObject
     private float Range;
     [SerializeField]
     private List<Transform> WayPoints;
-    [SerializeField]
     private NavMeshAgent Walker;
-    [SerializeField]
     private Weapon Canon;
 
     private short CurrentPoint;
@@ -56,6 +54,7 @@ public class AI : UnimmortallObject
             if (CurrentPoint < WayPoints.Count)
             {
                 Walker.destination = WayPoints[CurrentPoint].position;
+                Debug.Log($"{this.name}: {CurrentPoint}");
                 CurrentPoint++;
             }
             else

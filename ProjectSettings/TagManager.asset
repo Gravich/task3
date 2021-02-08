@@ -3,20 +3,17 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-  - Actor
-  - CamRTS
-  - ActorLookPoint
+  tags: []
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Navmesh
+  - 
   - Water
   - UI
   - 
   - 
-  - 
+  - PostProcessing
   - 
   - 
   - 
