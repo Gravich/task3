@@ -1,4 +1,3 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,58 +5,53 @@ using UnityEngine.Events;
 
 public class CamOrto : MonoBehaviour
 {
-    public static Transform SharedLookPoint;
-
-    private Camera MainCam;
-    private Transform CameraTransform;
-
-    [SerializeField]
-    private Transform LookAtPointPos;
-
+    public static Vector3 SharedLookPoint;
+    
     [SerializeField]
     private float ScrollSpeed;
     [SerializeField]
     private float RotationSpeed;
     [SerializeField]
     private float CamSpeed;
-    [SerializeField]
     private const float ScrollMultiplier = 500f;
+
+
+    private Ray LookPoint;
+    private RaycastHit point;
+    private Transform CameraTransform;
 
     void Start()
     {
-        SharedLookPoint = LookAtPointPos;
-        CameraTransform = Camera.main.transform;//схороним ссылку на трансформ заранее, к нему придетс€ посто€нно обращатьс€
+        SharedLookPoint = new Vector3();
+        CameraTransform = Camera.main.transform;
     }
 
 
     void Update()
     {
-        CameraRotate();
-        MoveLookPoint();
-        FindActor();
+        ModifyCameraLookPoint();
+        InterpolateToActorPosition();
     }
 
-    private void CameraRotate()
-    {
-        CameraTransform.position += Input.GetAxis("Mouse ScrollWheel") * CameraTransform.forward * ScrollSpeed * Time.deltaTime * ScrollMultiplier;//приближение камеры
-    }
 
-    private void MoveLookPoint()
+    private void ModifyCameraLookPoint()
     {
-        Ray LookAtPoint = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit point;
-        if (Physics.Raycast(LookAtPoint, out point))
+        CameraTransform.position += Input.GetAxis("Mouse ScrollWheel") * CameraTransform.forward * ScrollSpeed * Time.deltaTime * ScrollMultiplier;
+
+        LookPoint = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(LookPoint, out point))
         {
-            LookAtPointPos.position = point.point;
+            SharedLookPoint = point.point;
         }
     }
 
-    public void FindActor()//функци€ центрировани€ камеры на игроке
+
+    public void InterpolateToActorPosition()
     {
-        if (UnimmortallObject.Actor)
+        if (ActorController.Actor)
         {
-            this.transform.position = Vector3.Lerp(this.transform.position, UnimmortallObject.Actor.transform.position, 0.1f);
-            this.transform.position = Vector3.Lerp(this.transform.position, LookAtPointPos.position, 0.01f);
+           transform.position = Vector3.Lerp(transform.position, ActorController.Actor.transform.position, 0.1f);
+            transform.position = Vector3.Lerp(transform.position, SharedLookPoint, 0.01f);
         }
     }
 

@@ -1,4 +1,3 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,28 +5,32 @@ using UnityEngine;
 public class Weapon : MonoBehaviour
 {
     [SerializeField]
-    protected Bullet MainCalibrePrefab;
-    [SerializeField]
-    protected Bullet SubCalibrePrefab;
+    protected Bullet Ammo;
+
     [SerializeField]
     protected Transform ShootPos;
+
     [SerializeField]
     protected float ShootSpeed;
-    protected float _shootElapsed;
+    private float _shootElapsed;
 
-    public virtual void Shoot(Bullet _calibre, Transform _target)
+
+    protected virtual void Update()
     {
-        var bullet = Instantiate(_calibre);
-        bullet.Shoot(ShootPos.position, Vector3.Normalize((ShootPos.position - _target.position) * (-1)));
+        if (_shootElapsed > 0)
+        {
+            _shootElapsed -= Time.deltaTime;
+        }
     }
 
-    /// <summary>
-    /// По дефолту пуляет подкалиберными
-    /// </summary>
-    /// <param name="_target">в кого шмалять-с</param>
-    public virtual void Shoot(Transform _target)
+
+    public virtual void Shoot(Vector3 _target)
     {
-        var bullet = Instantiate(SubCalibrePrefab);
-        bullet.Shoot(ShootPos.position, Vector3.Normalize((ShootPos.position - _target.position) * (-1)));
+        if (_shootElapsed <= 0 && Ammo && ShootPos)
+        {
+            var bullet = Instantiate(Ammo);
+            bullet.Fly(ShootPos.position, Vector3.Normalize((ShootPos.position - _target) * (-1)));
+            _shootElapsed = 60 / ShootSpeed;
+        }
     }
 }

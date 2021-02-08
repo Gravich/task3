@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4483035409859764494}
   - component: {fileID: 4483035409859764490}
   m_Layer: 0
-  m_Name: MainCal
+  m_Name: AmmoGauss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,13 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7cfabeeeca44c342b6d644ccc822931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blast: {fileID: 2679094477417785904, guid: 41d7e932932ceb74eaf66a0ac09cd002, type: 3}
-  Tracer: {fileID: 3703693710448466022}
-  isSuperCanon: 1
-  _speed: 2000
-  _balisticsCoeff: 0.234
-  _bulletWeight: 2
-  _maxLifeTime: 1
+  ParticleDestroyBlast: {fileID: 2679094477417785904, guid: 41d7e932932ceb74eaf66a0ac09cd002,
+    type: 3}
+  TracerEffect: {fileID: 3703693710448466022}
+  Speed: 500
+  DamageMin: 700
+  DamageMax: 1500
+  MaxLifeTime: 1
 --- !u!1 &7889391091318586119
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,8 +97,6 @@ TrailRenderer:
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -110,7 +108,6 @@ TrailRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

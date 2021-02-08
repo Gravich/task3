@@ -1,54 +1,34 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+enum CutoffType {Auto, Single};
 public class ActorWeapon : Weapon
 {
-    private Ray LookAtPoint;
-    private RaycastHit _hit;
+    [SerializeField]
+    private KeyCode ShootInput;
+    [SerializeField]
+    private CutoffType ShootType;
 
-    void Update()
+
+    protected override void Update()
     {
-        LookAtPoint = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Input.GetKeyDown(KeyCode.Mouse1))
+        base.Update();
+        switch (ShootType)
         {
+            case CutoffType.Auto:
+                if (Input.GetKey(ShootInput))
+                {
+                    Shoot(CamOrto.SharedLookPoint);
+                }
+                break;
 
-            if (Physics.Raycast(LookAtPoint, out _hit))
-            {
-                var bot = _hit.collider.gameObject.GetComponent<AI>();
-                if (bot)
+            case CutoffType.Single:
+                if (Input.GetKeyDown(ShootInput))
                 {
-                    Shoot(MainCalibrePrefab, bot.transform);
+                    Shoot(CamOrto.SharedLookPoint);
                 }
-                else
-                {
-                    Shoot(MainCalibrePrefab, CamOrto.SharedLookPoint) ;
-                }
-            }
-        }
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            if (_shootElapsed <= 0)
-            {
-                if (Physics.Raycast(LookAtPoint, out _hit))
-                {
-                    var bot = _hit.collider.gameObject.GetComponent<AI>();
-                    if (bot)
-                    {
-                        Shoot(SubCalibrePrefab, bot.transform);
-                    }
-                    else
-                    {
-                        Shoot(SubCalibrePrefab, CamOrto.SharedLookPoint);
-                    }
-                }
-                _shootElapsed = 60 / ShootSpeed;
-            }
-            else
-            {
-                _shootElapsed -= Time.deltaTime;
-            }
+                break;
         }
     }
 }

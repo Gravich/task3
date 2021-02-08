@@ -1,30 +1,30 @@
-#pragma warning disable 649
-#pragma warning disable 618
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class UnimmortallObject : MonoBehaviour
+[RequireComponent(typeof(NavMeshAgent))]
+public class Creature : MonoBehaviour
 {
-    public static ActorController Actor;
+
     [HideInInspector]
     public Vector3 RespawnPoint;
+    protected NavMeshAgent Agent;
 
+    [Header("Base config")]
     [SerializeField]
-    private ParticleSystem blast;
+    private ParticleSystem ParticleDeathlyBlast;
     [SerializeField]
-    private ParticleSystem ShieldAttacked;
+    private ParticleSystem ParticleShieldAttacked;
     [SerializeField]
-    private ParticleSystem ShieldDestroy;
-    [SerializeField]
-    private Respawner RespawnManager;
+    private ParticleSystem ParticleShieldDestroy;
 
     [SerializeField]
     private float ShieldDefault;
-    private float ShieldCurrent;
-
     [SerializeField]
     private float ShieldRegenSpeed;
+    private float ShieldCurrent;
+
 
     [SerializeField]
     private float HPDefault;
@@ -35,10 +35,11 @@ public class UnimmortallObject : MonoBehaviour
         RespawnPoint = transform.position;
         HPCurrent = HPDefault;
         ShieldCurrent = ShieldDefault;
+        Agent = GetComponent<NavMeshAgent>();
     }
 
 
-    protected void RegenerateShield()
+    private void RegenerateShield()
     {
         if (ShieldCurrent < ShieldDefault)
         {
@@ -60,26 +61,30 @@ public class UnimmortallObject : MonoBehaviour
             HPCurrent -= DMG;
             if (HPCurrent<0)
             {
-                ToDeath();
+                Die();
             }
         }
         else
         {
             ShieldCurrent -= DMG;
-            var shieldEffect = Instantiate(ShieldAttacked, transform.position, new Quaternion());
-            shieldEffect.startColor = new Color(1, ShieldCurrent / ShieldDefault, ShieldCurrent / ShieldDefault);
-            shieldEffect.subEmitters.GetSubEmitterSystem(0).startColor = new Color(1, ShieldCurrent / ShieldDefault, ShieldCurrent / ShieldDefault);
-            if (ShieldCurrent <= 0)
+            if (ParticleShieldAttacked && ParticleShieldDestroy) 
             {
-                Instantiate(ShieldDestroy, transform.position, new Quaternion());
+                Instantiate(ParticleShieldAttacked, transform);
+                if (ShieldCurrent <= 0)
+                {
+                    Instantiate(ParticleShieldDestroy, transform.position, new Quaternion());
+                }
             }
         }
     }
 
 
-    protected void ToDeath()
+    protected void Die()
     {
-        Instantiate(blast, transform.position, new Quaternion());
-        Respawner.Instanse.Respawn(this);
+        Instantiate(ParticleDeathlyBlast, transform.position, new Quaternion());
+        SpawnManager.Instanse.Respawn(this);
     }
+
+
+    public virtual object RespawnData { get; set; }
 }

@@ -1,22 +1,29 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-public class AI : UnimmortallObject
+public class AI : Creature
 {
+    [Header("AI Config")]
+    [SerializeField]
+    protected Weapon Canon;
     [SerializeField]
     private float FOV;
     [SerializeField]
-    private float Range;
+    private float AgroRange;
+
     [SerializeField]
     private List<Transform> WayPoints;
-    private NavMeshAgent Walker;
-    private Weapon Canon;
+    private short CurrentWayPoint;
 
-    private short CurrentPoint;
+    [SerializeField]
+    private float AgroTimerDefault;
+    [SerializeField]
+    private float ForvardingRange;
+    private float AgroTimer;
+    private bool isAgro;
 
     protected override void Start()
     {
@@ -26,20 +33,13 @@ public class AI : UnimmortallObject
         {
             WayPoints = new List<Transform>();
         }
-        Walker = GetComponent<NavMeshAgent>();
         GameObject basePos = new GameObject();
         basePos.transform.position = transform.position;
         WayPoints.Add(basePos.transform);
-        CurrentPoint = 0;
-        //
-        Canon = GetComponent<Weapon>();
+        CurrentWayPoint = 0;
     }
 
-    public override void TakeDamage(float DMG)
-    {
-        base.TakeDamage(DMG);
-            this.transform.forward = -1*Vector3.Normalize(this.transform.position - Actor.transform.position);
-    }
+
     protected override void Update()
     {
         base.Update();
@@ -47,49 +47,123 @@ public class AI : UnimmortallObject
         AlarmCheck();
     }
 
-    void Walk()//функция зацикленного хождения туда-сюда, согласно списку вейпоинтов. Если вейпоинт один (базовый) - будем стоять на месте
-    {          //если в инспекторе задан хотя бы один вейпоинт - будем ходить до него и обратно
-        if (!Walker.hasPath)
+
+    void Walk()
+    {
+        if (isAgro)
         {
-            if (CurrentPoint < WayPoints.Count)
+            if (AgroTimer > 0)
             {
-                Walker.destination = WayPoints[CurrentPoint].position;
-                Debug.Log($"{this.name}: {CurrentPoint}");
-                CurrentPoint++;
+                if (ActorController.Actor && Vector3.Distance(transform.position, ActorController.Actor.transform.position) > ForvardingRange)
+                {
+                    Agent.destination = ActorController.Actor.transform.position;
+                }
+                else
+                {
+                    Agent.destination = transform.position;
+                }
             }
             else
-                CurrentPoint = 0;
+            {
+                SelectWayPoint();
+            }
+        }
+        else
+        {
+            if (!Agent.hasPath)
+            {
+                SelectWayPoint();
+            }
         }
     }
 
-    void AlarmCheck()//функция сканирования поля зрения на наличие игрока
-    {                //бот будет чекать, попадает ли игрок в поле зрения. Если да - рейкастит в него. Если луч не встречает препятствий - можно считать, что игрок виден
-        if (Actor)
+
+    private void SelectWayPoint()
+    {
+        if (CurrentWayPoint + 1 >= WayPoints.Count)
+        {
+            CurrentWayPoint = 0;
+        }
+        else
+        {
+            CurrentWayPoint++;
+        }
+        Agent.destination = WayPoints[CurrentWayPoint].position;
+    }
+    
+    
+    public override void TakeDamage(float DMG)
+    {
+        base.TakeDamage(DMG);
+        BeAgro();
+    }
+
+
+    private void BeAgro()
+    {
+        AgroTimer = AgroTimerDefault;
+        isAgro = true;
+        Attack();
+    }
+
+
+    void AlarmCheck()
+    {
+        if (AgroTimer>0)
+        {
+            AgroTimer -= Time.deltaTime;
+        }
+        else
+        {
+            isAgro = false;
+        }
+        if (ActorController.Actor)
         {
             //Расчет попадания в поле зрения
-            Vector3 search = Actor.transform.position - transform.position;
+            Vector3 search = ActorController.Actor.transform.position - transform.position;
             float angle = Vector3.Dot(search.normalized, transform.forward);
             if (angle > FOV)//если игрок в поле зрения, чекаем, не за стеной ли он
             {
                 RaycastHit checkedObj;
-                if (Physics.Raycast(transform.position, search, out checkedObj, Range))
+                if (Physics.Raycast(transform.position, search, out checkedObj, AgroRange))
                 {
                     var castedActor = checkedObj.collider.gameObject.GetComponentInParent<ActorController>();
                     if (castedActor)
                     {
-                        Attack();
+                        BeAgro();
                     }
                 }
             }
         }
     }
 
+
     void Attack()
     {
-        if(Actor)
+        if(ActorController.Actor)
         {
-            Canon.Shoot(Actor.transform);
-            this.transform.forward = -1 * Vector3.Normalize(this.transform.position - Actor.transform.position);
+            var _target = ActorController.Actor.transform.position;
+            _target.y += ActorController.Actor.Mark;
+            Canon.Shoot(_target);
+            transform.forward = -1 * Vector3.Normalize(transform.position - ActorController.Actor.transform.position);
+        }
+    }
+
+
+    public override object RespawnData
+    {
+        get
+        {
+            List<Transform> _wayPoints = new List<Transform>();
+            foreach (var point in WayPoints)
+            {
+                _wayPoints.Add(point);
+            }
+            return WayPoints;
+        }
+        set
+        {
+            WayPoints = (List<Transform>)value;
         }
     }
 }

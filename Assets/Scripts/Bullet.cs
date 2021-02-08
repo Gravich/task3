@@ -1,41 +1,42 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+
 public class Bullet : MonoBehaviour
 {
     [SerializeField]
-    private ParticleSystem blast;
+    private ParticleSystem ParticleDestroyBlast;
     [SerializeField]
-    private TrailRenderer Tracer;
-    [SerializeField]
-    private bool isSuperCanon;
+    private TrailRenderer TracerEffect;
+    
 
     [SerializeField]
-    private float _speed;
+    private float Speed;
     [SerializeField]
-    private float _balisticsCoeff = 0.234f;
+    private float DamageMin;
     [SerializeField]
-    private float _bulletWeight = 3.6f;
+    private float DamageMax;
+
     [SerializeField]
-    private float _maxLifeTime = 3.0f;
+    private float MaxLifeTime;
     private float _lifeTime;
-    private const float _balisticsConst = 0.0052834f;
 
-    private RaycastHit _rayHit;
-    private Vector3 _oldPosition;
-    private Vector3 _velocity;
+    private RaycastHit RayHit;
+    private Vector3 OldPosition;
+    private Vector3 Velocity;
+
 
     void Start()
     {
-        _lifeTime = _maxLifeTime;
+        _lifeTime = MaxLifeTime;
     }
 
-    public void Shoot(Vector3 shootPosition, Vector3 shootDirection)
+
+    public void Fly(Vector3 shootPosition, Vector3 shootDestination)
     {
-            _velocity = shootDirection * _speed;
-            transform.position = shootPosition;
+        Velocity = shootDestination * Speed;
+        transform.position = shootPosition;
     }
 
 
@@ -43,40 +44,35 @@ public class Bullet : MonoBehaviour
     {
         if (_lifeTime > 0)
         {
-            _oldPosition = transform.position;
-            transform.position += _velocity * Time.deltaTime;
-
-            // Баллистика
-            var deltaPos = (transform.position - _oldPosition).magnitude;
-            var m = (_balisticsConst * deltaPos) / _balisticsCoeff;
-            _velocity = Mathf.Pow(-m + Mathf.Sqrt(_velocity.magnitude), 2) * _velocity.normalized;
-            _velocity += Physics.gravity * Time.deltaTime;
-            //
-
-
-            if (Physics.Linecast(_oldPosition, transform.position, out _rayHit))
+            OldPosition = transform.position;
+            transform.position += Velocity * Time.deltaTime;
+            if (Physics.Linecast(OldPosition, transform.position, out RayHit))
             {
-                var target = _rayHit.collider.gameObject.GetComponent<UnimmortallObject>();
+                var target = RayHit.collider.gameObject.GetComponent<Creature>();
                 if (target)
                 {
-                    var velocityMag = _velocity.magnitude;
-                    var energy = (_bulletWeight / 100.0f) * velocityMag * velocityMag / 2.0f;
-                    target.TakeDamage(energy / 10);
+                    target.TakeDamage(Random.Range(DamageMin, DamageMax));
                 }
-                Instantiate(blast, transform.position, new Quaternion());
-                if (isSuperCanon) Tracer.transform.parent = null;
-                Destroy(this.gameObject);
+                Destroy();
             }
-
-            Debug.DrawLine(_oldPosition, transform.position, Color.red, _maxLifeTime);
+            Debug.DrawLine(OldPosition, transform.position, Color.red, MaxLifeTime);
             _lifeTime -= Time.deltaTime;
         }
         else
         {
-            Instantiate(blast, transform.position, new Quaternion());
-            if (isSuperCanon) Tracer.transform.parent = null;
-            Destroy(this.gameObject);
+            Destroy();
         }
 
+    }
+
+
+    private void Destroy()
+    {
+        if (ParticleDestroyBlast)
+        {
+            Instantiate(ParticleDestroyBlast, transform.position, new Quaternion());
+        }
+        TracerEffect.transform.parent = null;
+        Destroy(gameObject);
     }
 }

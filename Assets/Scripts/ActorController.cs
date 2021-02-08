@@ -1,4 +1,3 @@
-#pragma warning disable 649
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,22 +7,21 @@ using UnityEngine.Animations;
 /// <summary>
 /// Alien Shooter moves like Controller
 /// </summary>
-[RequireComponent(typeof(NavMeshAgent))]
-public class ActorController : UnimmortallObject
+public class ActorController : Creature
 {
-    NavMeshAgent Agent;
+    public static ActorController Actor;
+    [Header("Actor Config")]
     [SerializeField]
     private Transform Visual;
+
     [SerializeField]
     private float MoveSpeed;
+    public int Mark;
 
     protected override void Start()
     {
         base.Start();
-        ConstraintSource lookPoint = new ConstraintSource();
-        lookPoint.sourceTransform = CamOrto.SharedLookPoint;
         Actor = this;
-        Agent = this.GetComponent<NavMeshAgent>();
     }
 
     protected override void Update()
@@ -32,7 +30,7 @@ public class ActorController : UnimmortallObject
         var pos = this.transform.position;
         pos.x -= Input.GetAxis("Horizontal")*MoveSpeed;
         pos.z -= Input.GetAxis("Vertical")*MoveSpeed;
-        Visual.transform.forward = -1 * Vector3.Normalize(this.transform.position - CamOrto.SharedLookPoint.position);
+        Visual.transform.forward = -1 * Vector3.Normalize(this.transform.position - CamOrto.SharedLookPoint);
         Agent.nextPosition = pos;
     }
 }
